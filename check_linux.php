@@ -82,6 +82,8 @@ if ($help == true) {
 	echo "\to=<path/file> -> Path and File name.\n";
 	echo "m=interface -> Interface bandwidth (in/out 10 seconds).\n";
 	echo "\to=<interface> -> Interface name (eth0, wlan0, ...).\n";
+	echo "m=ping -> Ping to another host (in/out 10 seconds).\n";
+	echo "\to=<ip> -> IP host (192.168.1.100, ...).\n";
 
 	
 #	echo "m=path -> Path name (need a 'option').\n";
@@ -286,7 +288,83 @@ if (($version == false) and ($help == false) and ($mode != "")) {
 		$string_out = "CPU % usage >> ".$cpu;
 		$value_out = $cpu;
 		$pnp_out = "%=".$cpu;
-}
+	}
+
+	if ($mode == "cpu_sar") {
+		$command = "sar -u 1 5 | tail -1 | awk \"{print \\$8}\"";
+		$value = command($command,$connect,$host);
+		$value = str_replace("\n",";",$value);
+		$cpu = 100 - $value;
+		$string_out = "CPU % usage >> ".$cpu;
+		$value_out = $cpu;
+		$pnp_out = "%=".$cpu;
+	}
+
+	if ($mode == "cpu2") {
+		#     user    nice   system  idle      iowait irq   softirq  steal  guest  guest_nice
+		#cpu  74608   2520   24433   1117073   6176   4054  0        0      0      0
+		$command = "cat /proc/stat | grep 'cpu '";
+		$value_1 = command($command,$connect,$host);
+		$user_1 = "";
+		$nice_1 = "";
+		$system_1 = "";
+		$idle_1 = "";
+		$iowait_1 = "";
+		$irq_1 = "";
+		$softirq_1 = "";
+		$steal_1 = "";
+		$guest_1 = "";
+		$guest_nice_1 = "";
+		$variable = 1;
+		for ($i = 1; $i < strlen($value_1); $i++) {
+			if (($value_1[$i] != " ") AND ($value_1[$i-1] == " ")) { $variable++; }
+			if (($value_1[$i] != " ") AND ($variable == 2)) { $user_1 .= $value_1[$i]; }
+			if (($value_1[$i] != " ") AND ($variable == 3)) { $nice_1 .= $value_1[$i]; }
+			if (($value_1[$i] != " ") AND ($variable == 4)) { $system_1 .= $value_1[$i]; }
+			if (($value_1[$i] != " ") AND ($variable == 5)) { $idle_1 .= $value_1[$i]; }
+			if (($value_1[$i] != " ") AND ($variable == 6)) { $iowait_1 .= $value_1[$i]; }
+			if (($value_1[$i] != " ") AND ($variable == 7)) { $irq_1 .= $value_1[$i]; }
+			if (($value_1[$i] != " ") AND ($variable == 8)) { $softirq_1 .= $value_1[$i]; }
+			if (($value_1[$i] != " ") AND ($variable == 9)) { $steal_1 .= $value_1[$i]; }
+			if (($value_1[$i] != " ") AND ($variable == 10)) { $guest_1 .= $value_1[$i]; }
+			if (($value_1[$i] != " ") AND ($variable == 11)) { $guest_nice_1 .= $value_1[$i]; }
+		}
+
+		$command = "cat /proc/stat | grep 'cpu '";
+		$value_2 = command($command,$connect,$host);
+		$user_2 = "";
+		$nice_2 = "";
+		$system_2 = "";
+		$idle_2 = "";
+		$iowait_2 = "";
+		$irq_2 = "";
+		$softirq_2 = "";
+		$steal_2 = "";
+		$guest_2 = "";
+		$guest_nice_2 = "";
+		$variable = 1;
+		for ($i = 1; $i < strlen($value_2); $i++) {
+			if (($value_2[$i] != " ") AND ($value_2[$i-1] == " ")) { $variable++; }
+			if (($value_2[$i] != " ") AND ($variable == 2)) { $user_2 .= $value_2[$i]; }
+			if (($value_2[$i] != " ") AND ($variable == 3)) { $nice_2 .= $value_2[$i]; }
+			if (($value_2[$i] != " ") AND ($variable == 4)) { $system_2 .= $value_2[$i]; }
+			if (($value_2[$i] != " ") AND ($variable == 5)) { $idle_2 .= $value_2[$i]; }
+			if (($value_2[$i] != " ") AND ($variable == 6)) { $iowait_2 .= $value_2[$i]; }
+			if (($value_2[$i] != " ") AND ($variable == 7)) { $irq_2 .= $value_2[$i]; }
+			if (($value_2[$i] != " ") AND ($variable == 8)) { $softirq_2 .= $value_2[$i]; }
+			if (($value_2[$i] != " ") AND ($variable == 9)) { $steal_2 .= $value_2[$i]; }
+			if (($value_2[$i] != " ") AND ($variable == 10)) { $guest_2 .= $value_2[$i]; }
+			if (($value_2[$i] != " ") AND ($variable == 11)) { $guest_nice_2 .= $value_2[$i]; }
+		}
+
+		$active = ($user_2 - $user_1) + ($system_2 - $system_1) + ($iowait_2 - $iowait_1);
+		$total = $active + ($idle_2 - $idle_1);
+		$cpu = round((($active*100)/$total),2);
+		$string_out = "CPU % usage >> ".$cpu;
+		$value_out = $cpu;
+		$pnp_out = "%=".$cpu;
+	}
+
 
 	if ($mode == "cpu_pro") {
 		#     user    nice   system  idle      iowait irq   softirq  steal  guest  guest_nice
@@ -464,6 +542,18 @@ if (($version == false) and ($help == false) and ($mode != "")) {
 		$value_out = $value_stoped;
 		$string_out = "Number of processes running ".$value_running." and stopped process >> ".$value_out;
 		$pnp_out = "errors=".$value_out.";".$warning.";".$critical;
+	}
+
+	if ($mode == "ping") {
+		$command = "ping -c 4 ".$option." | grep -e '100.0%' | wc -l";
+		$value = command($command,$connect,$host);
+		$value = $value*1;
+		if ($value == 0) { $value_out = 1; }
+		else {
+			if ($value == 1) { $value_out = 0; }
+		}
+		$string_out = "Status PING to ".$option." (1=OK 0=Packet loss) >> ".$value_out;
+		$pnp_out = "status=".$value_out.";".$warning.";".$critical;
 	}
 
 	if ($warning != "") { if ($value_out >= $warning) { $salida = 1; $string_salida = "WARNING - "; } }

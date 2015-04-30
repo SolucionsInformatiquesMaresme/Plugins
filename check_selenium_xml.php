@@ -142,24 +142,9 @@ if (($version == false) and ($help == false)) {
 		} else {
 			echo "OK - Selenium check ".$value." in ".$time." seconds and ".$errors." errors.".$error_description." | errors=".$errors.";; time=".$time.";;";
 		}
-#		echo $value;
 		echo "\n";
-#		$in = round(((($in_2-$in_1)/10)/1024),0);
-#		$out = round(((($out_2-$out_1)/10)/1024),0);
-#		$value_out = round(($in+$out),0);
-#		$string_out = "Bandwidth ".$option." IN=".$in."Kb/sec OUT=".$out."Kb/sec, Total bandwith in Kb/sec >> ".$value_out;
-#		$pnp_out = "Total_Kb_sec=".$value_out.";".$warning.";".$critical;
 	}
 
-#	if ($warning != "") { if ($value_out >= $warning) { $salida = 1; $string_salida = "WARNING - "; } }
-#	if ($critical != "") { if ($value_out >= $critical){ $salida = 2; $string_salida = "CRITICAL - "; } }
-#	if ($warning_low != "") { if ($value_out <= $warning_low) { $salida = 1; $string_salida = "WARNING - "; } }
-#	if ($critical_low != "") { if ($value_out <= $critical_low){ $salida = 2; $string_salida = "CRITICAL - "; } }
-#	if ($pnp_out == "") {
-#		echo $string_salida.$string_out."\n";
-#	} else {
-#		echo $string_salida.$string_out." | ".$pnp_out."\n";
-#	}
 
 }
 

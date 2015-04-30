@@ -1,0 +1,1 @@
+/usr/bin/java -jar /usr/local/nagios/libexec/check_jmx.jar "$@"

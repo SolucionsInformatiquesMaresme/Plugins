@@ -17,28 +17,17 @@ $salida = 0;
 $string_salida = "OK - ";
 
 foreach ($argv as $arg) {
-        if (strpos($arg, "H=") !== false) { $host = str_replace("H=","",$arg); }
-
-        if (strpos($arg, "u=") !== false) { $url = str_replace("u=","",$arg); }
-        if (strpos($arg, "s=") !== false) { $string = str_replace("s=","",$arg); }
-
-
-        if (strpos($arg, "w=") !== false) { $warning = str_replace("w=","",$arg); }
-        if (strpos($arg, "c=") !== false) { $critical = str_replace("c=","",$arg); }
-        if (strpos($arg, "W=") !== false) { $warning_low = str_replace("W=","",$arg); }
-        if (strpos($arg, "C=") !== false) { $critical_low = str_replace("C=","",$arg); }
+	if (strpos($arg, "H=") !== false) { $dbhost = str_replace("H=","",$arg); }
+	if (strpos($arg, "u=") !== false) { $dbuname = str_replace("u=","",$arg); }
+	if (strpos($arg, "p=") !== false) { $dbpass = str_replace("p=","",$arg); }
+	if (strpos($arg, "d=") !== false) { $dbname = str_replace("d=","",$arg); }
+	if (strpos($arg, "j=") !== false) { $job = str_replace("j=","",$arg); }
+	if (strpos($arg, "w=") !== false) { $warning = str_replace("w=","",$arg); }
+	if (strpos($arg, "c=") !== false) { $critical = str_replace("c=","",$arg); }
 }
 
-	$result = shell_exec("curl -s ".$url);
-	if ((strpos($result,$string)) !== FALSE) { 
-		$string_out = "Existe el string ".$string." en la url <".$url.">";
-	} else {
-		$string_salida = "CRITICAL - ";
-		$string_out = "NO existe el string ".$string." en la url <".$url.">";
-		$salida = 2;
-	}
-
-	echo $string_salida.$string_out."\n";
+$dbhandle = sybase_connect($dbhost, $dbuname, $dbpass) or die("Couldn't connect to sybase Server on $dbhost");
+$db = sybase_select_db($dbname, $dbhandle) or die("Couldn't open database $myDB");
 
 exit($salida)
 
