@@ -118,6 +118,17 @@ if (($version == false) and ($help == false) and ($mode != "")) {
 		return $result;
 	}
 
+	function command_and_local_command($command,$local_command,$connect,$host) {
+		$result = "";
+		$result = shell_exec($connect." '".$command."' ".$local_command);
+		if ($result == "") {
+			echo "UNKNOWN - Connection is not possible or command no exist on ".$host." host.";
+			$salida = 3;
+			exit($salida);
+		}
+		return $result;
+	}
+
 	if ($mode == "uptime") {
 		$command = "cat /proc/uptime | sed 1q";
 		$value = command($command,$connect,$host);
@@ -169,16 +180,26 @@ if (($version == false) and ($help == false) and ($mode != "")) {
 	}
 
 	if ($mode == "proces") {
-		$command = "ps aux | grep -e '".$option."' | wc -l";
-		$value = command($command,$connect,$host);
-		$value_out = ($value*1)-2;
-		if ($host_local == true) { $value_out = $value_out - 1; }
+		$command = "ps aux";
+		$local_command = "| grep -e ".$option." | wc -l";
+		$value = command_and_local_command($command,$local_command,$connect,$host);
+		$value_out = $value*1;
 		$string_out = "Number of processes ".$option." >> ".$value_out;
 		$pnp_out = "proces=".$value_out.";".$warning.";".$critical;
 	}
 
-
-
+	if ($mode == "proces_total") {
+		$command = "ps aux";
+		if ($option == "") { 
+			$local_command = "| wc -l";
+		} else {
+			$local_command = "| grep -e ' ".$option."' | wc -l";
+		}
+		$value = command_and_local_command($command,$local_command,$connect,$host);
+		$value_out = $value*1;
+		$string_out = "Number of processes ".$option." >> ".$value_out;
+		$pnp_out = "proces=".$value_out.";".$warning.";".$critical;
+	}
 
 	if ($mode == "users") {
 		$command = "w | wc -l";
@@ -500,12 +521,12 @@ if (($version == false) and ($help == false) and ($mode != "")) {
 		$pnp_out = "size_kb=".$value_out.";".$warning.";".$critical;
 	}
 
-	if ($mode == "file_size") {
+	if ($mode == "file_size_bytes") {
 		$command = "stat -c %s ".$option;
 		$value = command($command,$connect,$host);
-		$value_out = round(($value/1024),0);
-		$string_out = "File ".$option." size in Kb >> ".$value_out;
-		$pnp_out = "size_kb=".$value_out.";".$warning.";".$critical;
+		$value_out = $value*1;
+		$string_out = "File ".$option." size in bytes >> ".$value_out;
+		$pnp_out = "size_bytes=".$value_out.";".$warning.";".$critical;
 	}
 
 	if ($mode == "interface") {
@@ -532,11 +553,11 @@ if (($version == false) and ($help == false) and ($mode != "")) {
 	}
 
 	if ($mode == "zimbra") {
-		$command = "zmcontrol status | grep -e 'Stopped' | wc -l";
+		$command = "sudo -u zimbra /opt/zimbra/bin/zmcontrol status | grep -e 'Stopped' | wc -l";
 		$value = command($command,$connect,$host);
 		$value_stoped = $value*1;
 
-		$command = "zmcontrol status | grep -e 'Running' | wc -l";
+		$command = "sudo -u zimbra /opt/zimbra/bin/zmcontrol status| grep -e 'Running' | wc -l";
 		$value = command($command,$connect,$host);
 		$value_running = $value*1;
 		$value_out = $value_stoped;
