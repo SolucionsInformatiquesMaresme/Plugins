@@ -180,11 +180,14 @@ if (($version == false) and ($help == false) and ($mode != "")) {
 	}
 
 	if ($mode == "proces") {
+		$option_inicial = $option;
+		$option = str_replace("[","\[",$option);
+		$option = str_replace("]","\]",$option);
 		$command = "ps aux";
-		$local_command = "| grep -e ".$option." | wc -l";
+		$local_command = "| grep -e \"".$option."\" | wc -l";
 		$value = command_and_local_command($command,$local_command,$connect,$host);
 		$value_out = $value*1;
-		$string_out = "Number of processes ".$option." >> ".$value_out;
+		$string_out = "Number of processes ".$option_inicial." >> ".$value_out;
 		$pnp_out = "proces=".$value_out.";".$warning.";".$critical;
 	}
 
@@ -507,7 +510,7 @@ if (($version == false) and ($help == false) and ($mode != "")) {
 		$time_now = date("U");
 		$command = "stat -c %Y ".$option;
 		$value = command($command,$connect,$host);
-		$time = gmdate("Y-m-d H:i:s", ($value*1));
+		$time = date("Y-m-d H:i:s", ($value*1));
 		$value_out = $time_now-($value*1);
 		$string_out = "File ".$option." last modify ".$time." Seconds last modify >> ".$value_out;
 		$pnp_out = "seconds_last_modify=".$value_out.";".$warning.";".$critical;
