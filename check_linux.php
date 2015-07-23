@@ -155,8 +155,8 @@ if (($version == false) and ($help == false) and ($mode != "")) {
 	}
 
 	if (($mode == "filesystem") or ($mode == "filesystem_inode")){
-		if ($mode == "filesystem") { $command = "df | grep '".$option."$'"; }
-		if ($mode == "filesystem_inode") { $command = "df -i | grep '".$option."$'"; }
+		if ($mode == "filesystem") { $command = "df ".$option." | tail -1"; }
+		if ($mode == "filesystem_inode") { $command = "df -i ".$option." | tail -1"; }
 		$value = str_replace("%","",command($command,$connect,$host));
 		$variable = 0;
 		$total_space = "";
